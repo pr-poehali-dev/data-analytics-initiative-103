@@ -1,96 +1,138 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Music, Leaf, MapPin, Clock, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useToast } from "@/hooks/use-toast";
+import Icon from "@/components/ui/icon";
+
+// Имена пары и ключевые данные о свадьбе — меняются в одном месте
+const WEDDING = {
+  bride: "Анна",
+  groom: "Дмитрий",
+  date: "12 сентября 2026",
+  time: "16:00",
+  place: "Усадьба «Зелёный Сад», Подмосковье",
+  dressCode: "Изумрудный и золотой",
+};
+
+// Варианты горячего блюда
+const MAIN_DISHES = [
+  { value: "beef", label: "Говядина", desc: "Медальоны с трюфельным соусом" },
+  { value: "salmon", label: "Лосось", desc: "Запечённый с овощами гриль" },
+  { value: "veg", label: "Вегетарианское", desc: "Ризотто с белыми грибами" },
+];
+
+// Варианты напитков (множественный выбор)
+const DRINKS = ["Вода", "Сок", "Вино", "Шампанское"];
 
 const Index = () => {
+  const { toast } = useToast();
+
+  // Состояние формы RSVP
+  const [name, setName] = useState("");
+  const [attending, setAttending] = useState("yes");
+  const [dish, setDish] = useState("");
+  const [drinks, setDrinks] = useState<string[]>([]);
+  const [allergy, setAllergy] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  // Переключение напитка в чекбоксах
+  const toggleDrink = (drink: string) => {
+    setDrinks((prev) =>
+      prev.includes(drink) ? prev.filter((d) => d !== drink) : [...prev, drink]
+    );
+  };
+
+  // Отправка формы
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      toast({ title: "Укажите имя и фамилию", variant: "destructive" });
+      return;
+    }
+    if (attending === "yes" && !dish) {
+      toast({ title: "Выберите горячее блюдо", variant: "destructive" });
+      return;
+    }
+    setSubmitted(true);
+    toast({ title: "Спасибо, ваш ответ сохранён!" });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Навигация */}
       <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold tracking-tight">ЗЕЛЁНЫЙ ЗВУК</div>
+            <div className="font-display text-2xl font-bold tracking-tight">
+              {WEDDING.bride} <span className="text-accent">&</span> {WEDDING.groom}
+            </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
-                О нас
+              <a href="#details" className="text-muted-foreground hover:text-foreground transition-colors">
+                Детали
               </a>
-              <a href="#events" className="text-muted-foreground hover:text-foreground transition-colors">
-                Афиша
+              <a href="#story" className="text-muted-foreground hover:text-foreground transition-colors">
+                Наша история
               </a>
               <a href="#menu" className="text-muted-foreground hover:text-foreground transition-colors">
                 Меню
               </a>
-              <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
-                Контакты
+              <a href="#rsvp" className="text-muted-foreground hover:text-foreground transition-colors">
+                RSVP
               </a>
             </div>
-            <Button variant="outline" size="sm">
-              Забронировать
+            <Button variant="outline" size="sm" asChild>
+              <a href="#rsvp">Подтвердить</a>
             </Button>
           </div>
         </div>
       </nav>
 
-      {/* Hero секция */}
+      {/* Hero — главный экран */}
       <section className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[80vh]">
-            {/* Основной контент Hero */}
-            <div className="lg:col-span-8 flex flex-col justify-center">
+            <div className="lg:col-span-7 flex flex-col justify-center animate-fade-in">
               <div className="space-y-8">
                 <div className="space-y-4">
                   <Badge variant="secondary" className="w-fit">
-                    <Music className="w-3 h-3 mr-1" />
-                    Живая музыка и растения
+                    <Icon name="Heart" className="w-3 h-3 mr-1" />
+                    Приглашение на свадьбу
                   </Badge>
-                  <h1 className="text-6xl lg:text-8xl font-bold tracking-tight text-balance">
-                    Где музыка
-                    <span className="text-primary block">растёт вместе с нами</span>
+                  <h1 className="font-display text-6xl lg:text-8xl font-bold tracking-tight text-balance">
+                    {WEDDING.bride}
+                    <span className="text-accent block">& {WEDDING.groom}</span>
                   </h1>
                   <p className="text-xl text-muted-foreground max-w-2xl text-pretty">
-                    Уникальное сочетание живых акустических выступлений и ботанической красоты. Наслаждайтесь
-                    авторским кофе в окружении пышной зелени, открывая для себя новых артистов.
+                    Мы рады разделить с вами самый важный день нашей жизни.
+                    Приглашаем вас стать частью этого волшебного вечера среди зелени и тёплого света.
                   </p>
+                  <div className="flex items-center gap-3 text-2xl font-display text-primary">
+                    <Icon name="Calendar" className="w-6 h-6" />
+                    {WEDDING.date}
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" className="text-lg px-8">
-                    Забронировать столик
+                  <Button size="lg" className="text-lg px-8" asChild>
+                    <a href="#rsvp">Подтвердить присутствие</a>
                   </Button>
-                  <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent">
-                    Сегодняшнее шоу
+                  <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent" asChild>
+                    <a href="#details">Детали события</a>
                   </Button>
                 </div>
               </div>
             </div>
 
-            {/* Hero сетка изображений */}
-            <div className="lg:col-span-4 grid grid-cols-2 gap-2 auto-rows-fr h-fit self-center">
-              <Card className="aspect-square bg-card overflow-hidden rounded-lg">
+            <div className="lg:col-span-5 self-center">
+              <Card className="aspect-[4/5] bg-card overflow-hidden rounded-lg">
                 <img
-                  src="https://cdn.poehali.dev/templates/lp/acoustic-guitar-player-in-plant-filled-cafe.jpg"
-                  alt="Акустическое выступление"
-                  className="w-full h-full object-cover"
-                />
-              </Card>
-              <Card className="aspect-square bg-primary/20 overflow-hidden rounded-lg">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/lush-green-plants-and-hanging-gardens-in-cafe.jpg"
-                  alt="Атмосфера с растениями"
-                  className="w-full h-full object-cover"
-                />
-              </Card>
-              <Card className="aspect-square bg-accent/20 overflow-hidden rounded-lg">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/artisan-coffee-and-pastries-on-wooden-table.jpg"
-                  alt="Авторский кофе"
-                  className="w-full h-full object-cover"
-                />
-              </Card>
-              <Card className="aspect-square bg-card overflow-hidden rounded-lg">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/intimate-music-venue-with-plants-and-warm-lighting.jpg"
-                  alt="Камерная площадка"
+                  src="https://cdn.poehali.dev/projects/30b02276-cce8-4364-90c2-d710008f0326/files/865f7464-9048-43c4-9694-134ad3d1077a.jpg"
+                  alt="Анна и Дмитрий"
                   className="w-full h-full object-cover"
                 />
               </Card>
@@ -99,245 +141,248 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Секция преимуществ */}
-      <section className="py-20 bg-secondary/50">
+      {/* Детали события */}
+      <section id="details" className="py-20 bg-secondary/50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">АТМОСФЕРА ЗЕЛЁНОГО ЗВУКА</h2>
+            <h2 className="font-display text-4xl font-bold mb-4">ДЕТАЛИ ТОРЖЕСТВА</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-balance">
-              Наш подход, где музыка, природа и сообщество соединяются в единое целое
+              Всё, что нужно знать, чтобы провести этот вечер вместе с нами
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <Card className="p-8 text-center">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Music className="w-8 h-8 text-primary" />
+                <Icon name="Calendar" className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">1. Открывай</h3>
-              <p className="text-muted-foreground">
-                Мы помогаем открывать новые звуки и артистов в камерной обстановке, где каждая нота находит отклик.
-              </p>
+              <h3 className="font-display text-xl font-bold mb-2">Дата</h3>
+              <p className="text-muted-foreground">{WEDDING.date}</p>
             </Card>
-
             <Card className="p-8 text-center">
               <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Leaf className="w-8 h-8 text-accent" />
+                <Icon name="Clock" className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">2. Соединяйся</h3>
-              <p className="text-muted-foreground">
-                Соединяйся с природой и сообществом в нашем ботаническом оазисе, созданном для осознанного слушания.
-              </p>
+              <h3 className="font-display text-xl font-bold mb-2">Время</h3>
+              <p className="text-muted-foreground">Сбор гостей в {WEDDING.time}</p>
             </Card>
-
             <Card className="p-8 text-center">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="w-8 h-8 text-primary" />
+                <Icon name="MapPin" className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">3. Расти</h3>
-              <p className="text-muted-foreground">
-                Наблюдай, как артисты и сообщество расцветают в пространстве, которое питает творчество и подлинные связи.
-              </p>
+              <h3 className="font-display text-xl font-bold mb-2">Место</h3>
+              <p className="text-muted-foreground">{WEDDING.place}</p>
+            </Card>
+            <Card className="p-8 text-center">
+              <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Icon name="Shirt" className="w-8 h-8 text-accent" />
+              </div>
+              <h3 className="font-display text-xl font-bold mb-2">Дресс-код</h3>
+              <p className="text-muted-foreground">{WEDDING.dressCode}</p>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Сетка событий */}
-      <section id="events" className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-4xl font-bold">БЛИЖАЙШИЕ КОНЦЕРТЫ</h2>
-            <Button variant="outline">Вся афиша</Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="aspect-video bg-primary/20 relative overflow-hidden">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/indie-folk-singer-with-acoustic-guitar-in-intimate.jpg"
-                  alt="Выступление Анны Лесной"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-                <Badge className="absolute top-4 left-4">Сегодня</Badge>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">Анна Лесная</h3>
-                <p className="text-muted-foreground mb-4">Инди-фолк с ботаническими историями</p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    20:00
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    25 мест
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="aspect-video bg-accent/20 relative overflow-hidden">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/jazz-trio-performing-in-plant-filled-venue.jpg"
-                  alt="Трио Оранжерея"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-                <Badge className="absolute top-4 left-4" variant="secondary">
-                  Завтра
-                </Badge>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">Трио «Оранжерея»</h3>
-                <p className="text-muted-foreground mb-4">Джаз-фьюжн со звуками природы</p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    19:30
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    30 мест
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="aspect-video bg-primary/20 relative overflow-hidden">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/electronic-ambient-musician-with-synthesizers-and-.jpg"
-                  alt="Мох и Схемы"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-                <Badge className="absolute top-4 left-4" variant="outline">
-                  В эти выходные
-                </Badge>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">Мох и Схемы</h3>
-                <p className="text-muted-foreground mb-4">Эмбиент-электроника с датчиками растений</p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    21:00
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    40 мест
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Секция О нас */}
-      <section id="about" className="py-20 bg-secondary/30">
+      {/* Наша история */}
+      <section id="story" className="py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-bold mb-6 text-balance">Выращиваем звук в живых пространствах</h2>
+            <div className="relative order-2 lg:order-1">
+              <Card className="aspect-[4/5] overflow-hidden">
+                <img
+                  src="https://cdn.poehali.dev/projects/30b02276-cce8-4364-90c2-d710008f0326/files/ffa16ee8-dcd6-4a22-ab06-7693a9571182.jpg"
+                  alt="Сервировка свадебного стола"
+                  className="w-full h-full object-cover"
+                />
+              </Card>
+            </div>
+            <div className="order-1 lg:order-2">
+              <Badge variant="secondary" className="mb-4">
+                <Icon name="Heart" className="w-3 h-3 mr-1" />
+                Наша история
+              </Badge>
+              <h2 className="font-display text-4xl font-bold mb-6 text-balance">
+                Как всё начиналось
+              </h2>
               <div className="space-y-6 text-lg text-muted-foreground">
                 <p>
-                  «Зелёный Звук» — это больше, чем площадка. Это экосистема, где музыка и природа создают
-                  симбиотический опыт. Наше пространство украшают более 200 тщательно подобранных растений,
-                  которые реагируют на звуковые частоты, создавая живой, дышащий фон для камерных выступлений.
+                  Мы встретились однажды осенним вечером в маленькой кофейне с живой музыкой.
+                  Один общий плейлист, бесконечный разговор до закрытия — и стало ясно, что
+                  это начало чего-то большого.
                 </p>
                 <p>
-                  Каждый уголок рассказывает историю роста — от кофе с ферм, принадлежащих музыкантам, до
-                  акустического дизайна, который позволяет музыке и природе расцветать вместе.
+                  За эти годы мы прошли вместе многое: путешествия, переезды, мечты и планы.
+                  И вот настал день, когда мы хотим сказать друг другу «да» — в окружении самых
+                  близких людей. Спасибо, что будете рядом.
                 </p>
               </div>
               <div className="mt-8 grid grid-cols-2 gap-8">
                 <div>
-                  <div className="text-3xl font-bold text-primary">200+</div>
-                  <div className="text-muted-foreground">Живых растений</div>
+                  <div className="font-display text-3xl font-bold text-primary">5 лет</div>
+                  <div className="text-muted-foreground">вместе</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-accent">50+</div>
-                  <div className="text-muted-foreground">Артистов в месяц</div>
+                  <div className="font-display text-3xl font-bold text-accent">1 день</div>
+                  <div className="text-muted-foreground">который изменит всё</div>
                 </div>
               </div>
-            </div>
-            <div className="relative">
-              <Card className="aspect-[4/5] overflow-hidden">
-                <img
-                  src="https://cdn.poehali.dev/templates/lp/lush-indoor-garden-cafe-with-hanging-plants-and-na.jpg"
-                  alt="Интерьер Зелёного Звука"
-                  className="w-full h-full object-cover"
-                />
-              </Card>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA секция */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-5xl font-bold mb-6 text-balance">Готовы испытать музыку, которая растёт?</h2>
-          <p className="text-xl text-muted-foreground mb-8 text-balance">
-            Присоединяйтесь к нашему сообществу любителей музыки и ценителей растений. Забронируйте место
-            для незабываемого вечера, где звук и природа объединяются.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8">
-              Забронировать столик
-            </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent">
-              <MapPin className="w-4 h-4 mr-2" />
-              Как добраться
-            </Button>
+      {/* Меню — выбор позиций */}
+      <section id="menu" className="py-20 bg-secondary/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-4xl font-bold mb-4">МЕНЮ ВЕЧЕРА</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-balance">
+              Выбрать своё горячее блюдо вы сможете в форме подтверждения ниже
+            </p>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {MAIN_DISHES.map((d) => (
+              <Card key={d.value} className="p-8 text-center">
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Icon name="UtensilsCrossed" className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-display text-2xl font-bold mb-2">{d.label}</h3>
+                <p className="text-muted-foreground">{d.desc}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Форма RSVP */}
+      <section id="rsvp" className="py-20">
+        <div className="max-w-2xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="font-display text-4xl font-bold mb-4">ПОДТВЕРДИТЕ ПРИСУТСТВИЕ</h2>
+            <p className="text-xl text-muted-foreground text-balance">
+              Пожалуйста, заполните форму до 1 августа 2026
+            </p>
+          </div>
+
+          <Card className="p-8">
+            {submitted ? (
+              <div className="text-center py-12 animate-fade-in">
+                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Icon name="CheckCheck" className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="font-display text-3xl font-bold mb-3">Спасибо!</h3>
+                <p className="text-muted-foreground text-lg">
+                  Ваш ответ сохранён. Мы с нетерпением ждём встречи с вами!
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Имя и фамилия */}
+                <div className="space-y-2">
+                  <Label htmlFor="name">Имя и фамилия *</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Иван Иванов"
+                  />
+                </div>
+
+                {/* Присутствие */}
+                <div className="space-y-3">
+                  <Label>Сможете ли вы присутствовать?</Label>
+                  <RadioGroup value={attending} onValueChange={setAttending} className="flex gap-6">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="yes" id="att-yes" />
+                      <Label htmlFor="att-yes" className="font-normal cursor-pointer">Да, буду</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="no" id="att-no" />
+                      <Label htmlFor="att-no" className="font-normal cursor-pointer">К сожалению, нет</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {attending === "yes" && (
+                  <>
+                    {/* Горячее блюдо */}
+                    <div className="space-y-3">
+                      <Label>Выбор горячего блюда</Label>
+                      <RadioGroup value={dish} onValueChange={setDish} className="space-y-2">
+                        {MAIN_DISHES.map((d) => (
+                          <div key={d.value} className="flex items-center space-x-2">
+                            <RadioGroupItem value={d.value} id={`dish-${d.value}`} />
+                            <Label htmlFor={`dish-${d.value}`} className="font-normal cursor-pointer">
+                              {d.label} <span className="text-muted-foreground">— {d.desc}</span>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    {/* Напитки */}
+                    <div className="space-y-3">
+                      <Label>Напитки</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {DRINKS.map((drink) => (
+                          <div key={drink} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`drink-${drink}`}
+                              checked={drinks.includes(drink)}
+                              onCheckedChange={() => toggleDrink(drink)}
+                            />
+                            <Label htmlFor={`drink-${drink}`} className="font-normal cursor-pointer">
+                              {drink}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Аллергии */}
+                    <div className="space-y-2">
+                      <Label htmlFor="allergy">Аллергии или пожелания</Label>
+                      <Textarea
+                        id="allergy"
+                        value={allergy}
+                        onChange={(e) => setAllergy(e.target.value)}
+                        placeholder="Например: аллергия на орехи"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <Button type="submit" size="lg" className="w-full text-lg">
+                  Отправить
+                </Button>
+              </form>
+            )}
+          </Card>
         </div>
       </section>
 
       {/* Подвал */}
       <footer className="bg-secondary/50 py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="text-2xl font-bold mb-4">ЗЕЛЁНЫЙ ЗВУК</div>
-              <p className="text-muted-foreground mb-6 max-w-md">
-                Где музыка и природа создают незабываемые впечатления. Приходите на камерные выступления
-                в наш ботанический оазис.
-              </p>
-              <div className="flex gap-4">
-                <Button variant="outline" size="sm">
-                  Телеграм
-                </Button>
-                <Button variant="outline" size="sm">
-                  ВКонтакте
-                </Button>
-                <Button variant="outline" size="sm">
-                  Рассылка
-                </Button>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Адрес</h4>
-              <div className="space-y-2 text-muted-foreground">
-                <p>ул. Садовая, 123</p>
-                <p>Музыкальный квартал</p>
-                <p>Ежедневно 7:00 - 23:00</p>
-                <p>+7 (495) 123-45-67</p>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Услуги</h4>
-              <div className="space-y-2 text-muted-foreground">
-                <p>Живая музыка</p>
-                <p>Мастер-классы</p>
-                <p>Частные мероприятия</p>
-                <p>Резиденции артистов</p>
-              </div>
-            </div>
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="font-display text-3xl font-bold mb-4">
+            {WEDDING.bride} <span className="text-accent">&</span> {WEDDING.groom}
           </div>
-          <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2025 Зелёный Звук. Все права защищены.</p>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            С любовью ждём вас {WEDDING.date} в {WEDDING.place}
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button variant="outline" size="sm">
+              <Icon name="MapPin" className="w-4 h-4 mr-2" />
+              Как добраться
+            </Button>
+            <Button variant="outline" size="sm">
+              <Icon name="Phone" className="w-4 h-4 mr-2" />
+              Связаться
+            </Button>
+          </div>
+          <div className="border-t border-border mt-12 pt-8 text-muted-foreground">
+            <p>&copy; 2026 {WEDDING.bride} & {WEDDING.groom}. Сделано с любовью.</p>
           </div>
         </div>
       </footer>
