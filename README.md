@@ -1,3 +1,7 @@
-# data-analytics-initiative-103
+# Зелёный Звук — Лендинг кофейни с живой музыкой
 
-Initial repository setup for pr-poehali-dev/data-analytics-initiative-103
+![Preview](https://cdn.poehali.dev/templates/lp/preview-ru-v5.jpg)
+
+Атмосферный лендинг для кофейни или бара с живой музыкой. Тёмная тема с зелёными акцентами, расписание концертов и галерея артистов. Идеально для заведений с уникальной атмосферой и культурной программой.
+
+`"tags": ["landing", "dark", "creative", "general"]`
